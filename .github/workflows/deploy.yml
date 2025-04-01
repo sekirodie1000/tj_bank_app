@@ -51,6 +51,12 @@ jobs:
 
       - name: Set up gcloud SDK
         uses: google-github-actions/setup-gcloud@v2
+        with:
+          install_components: 'gke-gcloud-auth-plugin'
+          version: '>= 453.0.0'
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
 
       - name: Get GKE credentials
         run: |
@@ -61,4 +67,3 @@ jobs:
       - name: Deploy to K8s
         run: |
           kubectl rollout restart deployment bank-app
-      
