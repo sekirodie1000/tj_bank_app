@@ -44,11 +44,21 @@ jobs:
           docker buildx create --use
           docker buildx build --platform linux/amd64 -t $ECR_REPO:latest --push .
 
-      - name: Set up kubeconfig
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+      - name: Set up gcloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Get GKE credentials
         run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 --decode > $HOME/.kube/config
+          gcloud container clusters get-credentials $CLUSTER_NAME \
+            --region europe-west1 \
+            --project springboot-bank-gk
 
       - name: Deploy to K8s
         run: |
           kubectl rollout restart deployment bank-app
+      
