@@ -12,7 +12,7 @@ jobs:
       AWS_REGION: eu-west-1
       ECR_REGISTRY: 577638355868.dkr.ecr.eu-west-1.amazonaws.com
       ECR_REPO: 577638355868.dkr.ecr.eu-west-1.amazonaws.com/my-bank-app
-      CLUSTER_NAME: gk3-my-gke-cluster
+      CLUSTER_NAME: my-gke-cluster
       K8S_NAMESPACE: default
 
     steps:
