@@ -1,53 +1,40 @@
 # The Java Bank
 
-The Java Bank is a simple banking application built with **Spring Boot** and **MySQL**. It supports basic banking operations like account creation, balance enquiry, credit, debit, fund transfer, and transaction history generation with PDF generation.
+A full-featured banking backend application built with Spring Boot and MySQL.  
+Now production-ready with JWT authentication, CI/CD via GitHub Actions, and Kubernetes deployment to GKE.
 
 ## Features
-- User Account Creation
-- Balance Enquiry
-- Credit & Debit Operations
-- Funds Transfer between Accounts
-- Generate Bank Statement (PDF) and Send via Email
+
+- User registration and login with JWT authentication
+- Balance enquiry
+- Credit and debit operations
+- Funds transfer between accounts
+- PDF statement generation and email sending
 
 ## Technologies Used
-- **Java (Spring Boot)**
-- **MySQL**
-- **JPA / Hibernate**
-- **Swagger (OpenAPI)**
-- **iText (PDF Generation)**
-- **JavaMail (Sending Emails)**
 
-## Getting Started
+- Java 17 with Spring Boot
+- Spring Security and JWT
+- MySQL with JPA / Hibernate
+- JavaMail and iText PDF
+- Docker + AWS ECR
+- Kubernetes (GKE)
+- GitHub Actions for CI/CD
+
+## Getting Started Locally
 
 ### Prerequisites
-- Java 20
+
+- Java 17+
+- MySQL (local or container)
 - Maven
-- MySQL Server
 
 ### Configuration
-In your `application.properties` file, add the following:
 
-```properties
-spring.application.name=the-java-bank
-spring.datasource.url=jdbc:mysql://localhost:3306/tja_bank
-spring.datasource.username=root
-spring.datasource.password=your_password
-spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-spring.jpa.hibernate.ddl-auto=update
+Use the provided `src/main/resources/application.properties.example` as a template.  
+Make sure to provide values for email credentials and JWT secrets.
 
-spring.mail.host=smtp.gmail.com
-spring.mail.port=587
-spring.mail.username=your_email@gmail.com
-spring.mail.password=your_email_password
-spring.mail.properties.mail.smtp.auth=true
-spring.mail.properties.mail.smtp.starttls.enable=true
-```
-
-### Database Setup
-1. Create a MySQL database named `tja_bank`.
-2. Run the application to allow JPA to create the required tables.
-
-### Running the Application
+### Run Locally
 ```bash
 mvn spring-boot:run
 ```
@@ -60,4 +47,64 @@ http://localhost:8080/swagger-ui/index.html
 
 ## Usage
 Use tools like **Postman** or **cURL** to test the endpoints.
+
+## JWT Authentication
+
+- `POST /api/user` → Register a new user
+- `POST /api/user/login` → Receive JWT token
+- Use `Authorization: Bearer <token>` for authenticated endpoints
+
+## Docker
+
+To build and run locally:
+
+```bash
+./mvnw clean package -DskipTests
+docker build -t my-bank-app .
+docker run -p 8080:8080 my-bank-app
+```
+
+## CI/CD Pipeline
+
+### Requirements
+
+Set the following secrets in your GitHub repository:
+
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `GCP_CREDENTIALS` (base64-encoded GCP service account JSON)
+- `MAIL_PASSWORD`
+- `JWT_SECRET`
+
+### Flow
+
+The deployment process is triggered when changes are pushed to the `main` branch.
+
+Steps involved:
+
+1. Checkout the latest code.
+2. Build the Spring Boot application.
+3. Authenticate with AWS and log in to Amazon ECR.
+4. Build and push the Docker image to ECR.
+5. Authenticate with GCP using a service account.
+6. Get access to the GKE cluster.
+7. Restart the Kubernetes deployment to apply the new image.
+
+## Kubernetes
+
+### Included Manifest Files
+
+- `mysql.yaml`: Deploys a MySQL instance along with its service.
+- `deployment.yaml`: Defines the Spring Boot application deployment.
+- `service.yaml`: Exposes the application via a LoadBalancer on port 80.
+
+### Secrets Injection
+Create K8s secret for email and JWT values:
+```bash
+kubectl create secret generic app-secrets \
+  --from-literal=MAIL_PASSWORD=your-password \
+  --from-literal=JWT_SECRET=your-secret
+```
+
+
 
