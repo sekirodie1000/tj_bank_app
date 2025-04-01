@@ -1,15 +1,24 @@
 package com.xichen.thejavabank.service.impl;
 
+import com.xichen.thejavabank.config.JwtTokenProvider;
 import com.xichen.thejavabank.dto.*;
+import com.xichen.thejavabank.entity.Role;
 import com.xichen.thejavabank.entity.User;
 import com.xichen.thejavabank.repository.UserRepository;
 import com.xichen.thejavabank.utils.AccountUtils;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
 @Service
+@AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
     @Autowired
@@ -20,6 +29,15 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     TransactionService transactionService;
+
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
+    @Autowired
+    AuthenticationManager authenticationManager;
+
+    @Autowired
+    JwtTokenProvider jwtTokenProvider;
 
     @Override
     public BankResponse createAccount(UserRequest userRequest) {
@@ -43,10 +61,12 @@ public class UserServiceImpl implements UserService {
                 .status(userRequest.getStatus())
                 .accountNumber(AccountUtils.generateAccountNumber())
                 .accountBalance(BigDecimal.ZERO)
+                .password(passwordEncoder.encode(userRequest.getPassword()))
                 .email(userRequest.getEmail())
                 .phoneNumber(userRequest.getPhoneNumber())
                 .alternativePhoneNumber(userRequest.getAlternativePhoneNumber())
                 .status("ACTIVE")
+                .role(Role.valueOf("ROLE_ADMIN".toString()))
                 .build();
 
         User savedUser = userRepository.save(newUser);
@@ -69,6 +89,23 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
+
+    public BankResponse login(LoginDto loginDto){
+        Authentication authentication = null;
+        authentication  = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword())
+        );
+        EmailDetails loginAlert = EmailDetails.builder()
+                        .subject("You're logged in!")
+                                .recipient(loginDto.getEmail())
+                                        .messageBody("You logged into your account. If you did not initiate this request, please contact your bank")
+                                                .build();
+        emailService.sendEmailAlert(loginAlert);
+        return BankResponse.builder()
+                .responseCode("Login Success")
+                .responseMessage(jwtTokenProvider.generateJwtToken(authentication))
+                .build();
+    }
     @Override
     public BankResponse balanceEnquiry(EnquiryRequest request) {
         //check if the provided account number exists in the db
@@ -252,5 +289,7 @@ public class UserServiceImpl implements UserService {
     }
 
     // balance Enquiry, name Enquiry, credit, debit, transfer
+
+
 
 }

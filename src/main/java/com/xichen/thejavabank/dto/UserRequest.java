@@ -40,4 +40,7 @@ public class UserRequest {
 
     @Schema(name = "User Status")
     private String status;
+
+    @Schema(name = "password")
+    private String password;
 }

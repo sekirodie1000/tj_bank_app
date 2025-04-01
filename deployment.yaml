@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bank-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bank-app
+  template:
+    metadata:
+      labels:
+        app: bank-app
+    spec:
+      containers:
+        - name: bank-app
+          image: 577638355868.dkr.ecr.eu-west-1.amazonaws.com/my-bank-app
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_USERNAME
+              value: root
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: root
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:mysql://mysql:3306/tja_bank
+
+            - name: SPRING_MAIL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: bank-app-secret
+                  key: SPRING_MAIL_USERNAME
+            - name: SPRING_MAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: bank-app-secret
+                  key: SPRING_MAIL_PASSWORD
+
+            - name: APP_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: bank-app-secret
+                  key: APP_JWT_SECRET
+      imagePullSecrets:
+        - name: ecr-secret

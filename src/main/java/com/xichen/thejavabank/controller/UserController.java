@@ -1,10 +1,6 @@
 package com.xichen.thejavabank.controller;
 
-import com.xichen.thejavabank.dto.BankResponse;
-import com.xichen.thejavabank.dto.CreditDebitRequest;
-import com.xichen.thejavabank.dto.EnquiryRequest;
-import com.xichen.thejavabank.dto.TransferRequest;
-import com.xichen.thejavabank.dto.UserRequest;
+import com.xichen.thejavabank.dto.*;
 import com.xichen.thejavabank.service.impl.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -33,6 +29,11 @@ public class UserController {
     @PostMapping
     public BankResponse createAccount(@RequestBody UserRequest userRequest) {
         return userService.createAccount(userRequest);
+    }
+
+    @PostMapping("/login")
+    public BankResponse login(@RequestBody LoginDto loginDto) {
+        return userService.login(loginDto);
     }
 
     @Operation(

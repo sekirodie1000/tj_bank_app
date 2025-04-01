@@ -17,7 +17,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
                 contact = @Contact(
                         name = "Xi Chen",
                         email = "connerside@outlook.com",
-                        url = "https://github.com/sekirodie1000/tj_bank_app"
+                        url = "https://github.com/sekirodie1000/" +
+                                ""
                 ),
                 license = @License(
                         name = "The Java Academy",
